@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Gains Log</title>
+
+<!-- ホーム画面追加時の設定（iOS） -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gains Log">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f172a">
+
+<!-- アプリアイコン（データURIで埋め込み・外部依存なし） -->
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0iIzBmMTcyYSIvPjx0ZXh0IHg9IjkwIiB5PSIxMTUiIGZvbnQtc2l6ZT0iOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmOTczMTYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiPvCfkqo8L3RleHQ+PC9zdmc+">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card2: #334155;
+    --border: #334155;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #f97316;
+    --accent-dark: #ea580c;
+    --green: #22c55e;
+    --red: #ef4444;
+    --blue: #3b82f6;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 90px) 16px;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .header { padding: 24px 0 16px; }
+  .header h1 { font-size: 32px; font-weight: 900; letter-spacing: -1px; }
+  .header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .label { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 10px; display: block; }
+
+  input[type="date"], input[type="text"], input[type="number"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    color: var(--text);
+    font-size: 16px;
+    font-family: inherit;
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+
+  .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .section-head h2 { font-size: 18px; font-weight: 800; }
+
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:active { background: var(--accent-dark); }
+  .btn-full { width: 100%; justify-content: center; padding: 14px; }
+  .btn-gray { background: var(--card2); }
+  .btn-gray:active { background: #475569; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-actions { display: flex; gap: 10px; }
+  .form-actions .btn { flex: 1; }
+
+  .record {
+    display: flex;
+    align-items: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+  .record-info { flex: 1; min-width: 0; }
+  .record-info .name { font-weight: 700; font-size: 16px; }
+  .record-info .detail { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .progress { font-weight: 800; font-size: 16px; white-space: nowrap; }
+  .p-up { color: var(--green); }
+  .p-down { color: var(--red); }
+  .p-keep { color: var(--muted); }
+  .p-new { color: var(--blue); }
+  .del {
+    background: none; border: none; color: var(--muted);
+    font-size: 20px; padding: 4px 6px; cursor: pointer; line-height: 1;
+  }
+  .del:active { color: var(--red); }
+
+  .empty { text-align: center; color: var(--muted); padding: 32px 0; font-size: 14px; }
+
+  .ex-item { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 10px; }
+  .ex-head {
+    width: 100%; background: var(--bg); border: none; color: var(--text);
+    padding: 14px; display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; font-family: inherit; text-align: left; gap: 10px;
+  }
+  .ex-head .name { font-weight: 700; font-size: 15px; }
+  .ex-head .detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .ex-right { display: flex; align-items: center; gap: 10px; }
+  .chevron { color: var(--muted); transition: transform 0.2s; font-size: 12px; }
+  .chevron.open { transform: rotate(180deg); }
+  .ex-body { padding: 0 14px 8px; }
+  .hist-row {
+    display: flex; justify-content: space-between; font-size: 13px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .hist-row:last-child { border-bottom: none; }
+  .hist-row .when { color: var(--muted); }
+  .hist-row .val { font-weight: 600; }
+
+  .icon { display: inline-block; vertical-align: -2px; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>Gains Log</h1>
+    <p>トレーニングを記録して進捗を追う</p>
+  </div>
+
+  <div class="card">
+    <label class="label">📅 記録する日付</label>
+    <input type="date" id="dateInput">
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <h2 id="dateTitle"></h2>
+      <button class="btn" id="toggleForm">＋ 種目を追加</button>
+    </div>
+
+    <div id="formArea" style="display:none;">
+      <div class="form-grid" style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;">
+        <input class="full" type="text" id="exercise" placeholder="種目名（例：ベンチプレス）">
+        <input type="number" id="sets" placeholder="セット数" inputmode="numeric">
+        <input type="number" id="reps" placeholder="回数" inputmode="numeric">
+        <input class="full" type="number" id="weight" step="0.5" placeholder="重量（kg）" inputmode="decimal">
+        <div class="full form-actions">
+          <button class="btn" id="saveBtn">保存</button>
+          <button class="btn btn-gray" id="cancelBtn">キャンセル</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="todayList"></div>
+  </div>
+
+  <div class="card" id="progressCard" style="display:none;">
+    <div class="section-head">
+      <h2>📈 種目別の進捗</h2>
+    </div>
+    <div id="progressList"></div>
+  </div>
+
+<script>
+  var STORAGE_KEY = 'workoutData_v1';
+  var workouts = [];
+  var expanded = {};
+  var selectedDate = new Date().toISOString().split('T')[0];
+  var formOpen = false;
+
+  function load() {
+    try {
+      var s = localStorage.getItem(STORAGE_KEY);
+      workouts = s ? JSON.parse(s) : [];
+    } catch (e) { workouts = []; }
+  }
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts)); } catch (e) {}
+  }
+
+  function prevRecord(exercise) {
+    var arr = workouts.filter(function(w){ return w.exercise === exercise && w.date < selectedDate; });
+    arr.sort(function(a,b){ return new Date(b.date) - new Date(a.date); });
+    return arr[0] || null;
+  }
+
+  function progressOf(exercise, weight) {
+    var p = prevRecord(exercise);
+    if (!p) return { text: '初回', cls: 'p-new' };
+    var d = Math.round((weight - p.weight) * 10) / 10;
+    if (d > 0) return { text: '+' + d + 'kg ↑', cls: 'p-up' };
+    if (d < 0) return { text: d + 'kg ↓', cls: 'p-down' };
+    return { text: 'キープ', cls: 'p-keep' };
+  }
+
+  function fmtDate(dstr) {
+    var d = new Date(dstr);
+    var days = ['日','月','火','水','木','金','土'];
+    return (d.getMonth()+1) + '月' + d.getDate() + '日（' + days[d.getDay()] + '）';
+  }
+
+  function render() {
+    document.getElementById('dateInput').value = selectedDate;
+    document.getElementById('dateTitle').textContent = fmtDate(selectedDate);
+    document.getElementById('formArea').style.display = formOpen ? 'block' : 'none';
+    document.getElementById('toggleForm').textContent = formOpen ? '× 閉じる' : '＋ 種目を追加';
+
+    // 今日のリスト
+    var today = workouts.filter(function(w){ return w.date === selectedDate; });
+    var list = document.getElementById('todayList');
+    if (today.length === 0) {
+      list.innerHTML = '<div class="empty">この日の記録はまだありません</div>';
+    } else {
+      list.innerHTML = today.map(function(r){
+        var p = progressOf(r.exercise, r.weight);
+        return '<div class="record">' +
+          '<div class="record-info"><div class="name">' + esc(r.exercise) + '</div>' +
+          '<div class="detail">' + r.weight + 'kg × ' + r.reps + '回 × ' + r.sets + 'セット</div></div>' +
+          '<div class="progress ' + p.cls + '">' + p.text + '</div>' +
+          '<button class="del" data-id="' + r.id + '">✕</button></div>';
+      }).join('');
+    }
+
+    // 種目別進捗
+    var names = [];
+    workouts.forEach(function(w){ if (names.indexOf(w.exercise) === -1) names.push(w.exercise); });
+    names.sort();
+
+    var pCard = document.getElementById('progressCard');
+    var pList = document.getElementById('progressList');
+    if (names.length === 0) {
+      pCard.style.display = 'none';
+    } else {
+      pCard.style.display = 'block';
+      pList.innerHTML = names.map(function(name){
+        var hist = workouts.filter(function(w){ return w.exercise === name; });
+        hist.sort(function(a,b){ return new Date(b.date) - new Date(a.date); });
+        var latest = hist[0];
+        var p = progressOf(name, latest.weight);
+        var isOpen = !!expanded[name];
+        var body = '';
+        if (isOpen) {
+          body = '<div class="ex-body">' + hist.slice(0,6).map(function(r, i){
+            return '<div class="hist-row"><span class="when">' +
+              (i === 0 ? '最新' : i + '回前') + '・' + fmtDate(r.date) + '</span>' +
+              '<span class="val">' + r.weight + 'kg × ' + r.reps + '回 × ' + r.sets + 'セット</span></div>';
+          }).join('') + '</div>';
+        }
+        return '<div class="ex-item">' +
+          '<button class="ex-head" data-ex="' + esc(name) + '">' +
+          '<div><div class="name">' + esc(name) + '</div>' +
+          '<div class="detail">最新: ' + latest.weight + 'kg × ' + latest.reps + '回 × ' + latest.sets + 'セット</div></div>' +
+          '<div class="ex-right"><span class="progress ' + p.cls + '">' + p.text + '</span>' +
+          '<span class="chevron ' + (isOpen ? 'open' : '') + '">▼</span></div></button>' +
+          body + '</div>';
+      }).join('');
+    }
+    bind();
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function bind() {
+    document.querySelectorAll('.del').forEach(function(b){
+      b.onclick = function(){
+        var id = Number(b.getAttribute('data-id'));
+        workouts = workouts.filter(function(w){ return w.id !== id; });
+        save(); render();
+      };
+    });
+    document.querySelectorAll('.ex-head').forEach(function(b){
+      b.onclick = function(){
+        var ex = b.getAttribute('data-ex');
+        expanded[ex] = !expanded[ex];
+        render();
+      };
+    });
+  }
+
+  document.getElementById('dateInput').addEventListener('change', function(e){
+    selectedDate = e.target.value;
+    render();
+  });
+
+  document.getElementById('toggleForm').addEventListener('click', function(){
+    formOpen = !formOpen;
+    render();
+  });
+  document.getElementById('cancelBtn').addEventListener('click', function(){
+    formOpen = false;
+    clearForm();
+    render();
+  });
+  document.getElementById('saveBtn').addEventListener('click', function(){
+    var ex = document.getElementById('exercise').value.trim();
+    var sets = document.getElementById('sets').value;
+    var reps = document.getElementById('reps').value;
+    var weight = document.getElementById('weight').value;
+    if (!ex || !sets || !reps || !weight) {
+      alert('すべての項目を入力してください');
+      return;
+    }
+    workouts.push({
+      id: Date.now(),
+      date: selectedDate,
+      exercise: ex,
+      sets: parseInt(sets, 10),
+      reps: parseInt(reps, 10),
+      weight: parseFloat(weight)
+    });
+    save();
+    clearForm();
+    formOpen = false;
+    render();
+  });
+
+  function clearForm() {
+    document.getElementById('exercise').value = '';
+    document.getElementById('sets').value = '';
+    document.getElementById('reps').value = '';
+    document.getElementById('weight').value = '';
+  }
+
+  load();
+  render();
+</script>
+</body>
+</html>
